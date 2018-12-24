@@ -396,7 +396,7 @@ const analytics = {
 
 			analytics.tracks.recordEvent( 'calypso_page_view', eventProperties );
 
-			// Ensure every Calypso user is added to our retargeting audience via the AdWords retargeting tag
+			// Fire retargeting trackers
 			retarget();
 
 			// Track the page view with DCM Floodlight as well
