@@ -5,6 +5,10 @@
  */
 import React from 'react';
 import classnames from 'classnames';
+// GUTENLYPSO START
+import { connect } from 'react-redux';
+import page from 'page';
+// GUTENLYPSO END
 
 /**
  * WordPress dependencies
@@ -29,7 +33,6 @@ import { PluginPostPublishPanel, PluginPrePublishPanel } from '@wordpress/edit-p
 /**
  * Internal dependencies
  */
-import BrowserURL from 'gutenberg/editor/browser-url'; // GUTENLYPSO
 import Header from '../header';
 import TextEditor from '../text-editor';
 import VisualEditor from '../visual-editor';
@@ -39,7 +42,12 @@ import OptionsModal from '../options-modal';
 import MetaBoxes from '../meta-boxes';
 import SettingsSidebar from '../sidebar/settings-sidebar';
 import Sidebar from '../sidebar';
+// GUTENLYPSO START
+import BrowserURL from 'gutenberg/editor/browser-url';
+import EditorRestorePostDialog from 'post-editor/restore-post-dialog';
 import EditorRevisionsDialog from 'post-editor/editor-revisions/dialog';
+import getPostTypeTrashUrl from 'state/selectors/get-post-type-trash-url';
+// GUTENLYPSO END
 
 function Layout( {
 	mode,
@@ -54,9 +62,13 @@ function Layout( {
 	isMobileViewport,
 	isRichEditingEnabled,
 	// GUTENLYPSO START
+	editPost,
+	savePost,
 	updatePost,
 	resetBlocks,
 	post,
+	isTrash,
+	trashUrl,
 	// GUTENLYPSO END
 } ) {
 	const sidebarIsOpened = editorSidebarOpened || pluginSidebarOpened || publishSidebarOpened;
@@ -75,6 +87,16 @@ function Layout( {
 	};
 
 	// GUTENLYPSO START
+	// @see https://github.com/Automattic/wp-calypso/blob/f1822838b984651bfc71ac26ee29ed13fcc86353/client/post-editor/post-editor.jsx#L557-L560
+	const navigateBack = () => {
+		page.back( trashUrl );
+	};
+
+	const restorePost = () => {
+		editPost( { status: 'draft' } );
+		savePost();
+	};
+
 	const loadRevision = revision => {
 		const { post_content: content, post_title: title, post_excerpt: excerpt } = revision;
 		const postRevision = { ...post, content, title, excerpt };
@@ -112,7 +134,10 @@ function Layout( {
 					<MetaBoxes location="advanced" />
 				</div>
 			</div>
-			<EditorRevisionsDialog loadRevision={ loadRevision } /> { /* GUTENLYPSO */ }
+			{ /* GUTENLYPSO START */ isTrash && (
+				<EditorRestorePostDialog onClose={ navigateBack } onRestore={ restorePost } />
+			) }
+			<EditorRevisionsDialog loadRevision={ loadRevision } /> { /* GUTENLYPSO END */ }
 			{ publishSidebarOpened ? (
 				<PostPublishPanel
 					{ ...publishLandmarkProps }
@@ -148,7 +173,6 @@ function Layout( {
 
 export default compose(
 	withSelect( select => ( {
-		post: select( 'core/editor' ).getCurrentPost(), // GUTENLYPSO
 		mode: select( 'core/edit-post' ).getEditorMode(),
 		editorSidebarOpened: select( 'core/edit-post' ).isEditorSidebarOpened(),
 		pluginSidebarOpened: select( 'core/edit-post' ).isPluginSidebarOpened(),
@@ -157,17 +181,32 @@ export default compose(
 		hasActiveMetaboxes: select( 'core/edit-post' ).hasMetaBoxes(),
 		isSaving: select( 'core/edit-post' ).isSavingMetaBoxes(),
 		isRichEditingEnabled: select( 'core/editor' ).getEditorSettings().richEditingEnabled,
+		// GUTENLYPSO START
+		post: select( 'core/editor' ).getCurrentPost(),
+		postType: select( 'core/editor' ).getCurrentPostType(),
+		isTrash: 'trash' === select( 'core/editor' ).getEditedPostAttribute( 'status' ),
+		// GUTENLYPSO END
 	} ) ),
 	withDispatch( dispatch => {
-		const { updatePost, resetBlocks } = dispatch( 'core/editor' ); // GUTENLYPSO
+		const { editPost, savePost, updatePost, resetBlocks } = dispatch( 'core/editor' ); // GUTENLYPSO
 		const { closePublishSidebar, togglePublishSidebar } = dispatch( 'core/edit-post' );
 		return {
 			closePublishSidebar,
 			togglePublishSidebar,
-			updatePost, // GUTENLYPSO
-			resetBlocks, // GUTENLYPSO
+			// GUTENLYPSO START
+			editPost,
+			savePost,
+			updatePost,
+			resetBlocks,
+			// GUTENLYPSO END
 		};
 	} ),
 	navigateRegions,
 	withViewportMatch( { isMobileViewport: '< small' } )
-)( Layout );
+)(
+	// GUTENLYPSO START
+	connect( ( state, { postType } ) => ( {
+		trashUrl: getPostTypeTrashUrl( state, postType ),
+	} ) )( Layout )
+	// GUTENLYPSO END
+);
