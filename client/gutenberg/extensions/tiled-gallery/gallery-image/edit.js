@@ -6,7 +6,8 @@ import { BACKSPACE, DELETE } from '@wordpress/keycodes';
 import { Component, createRef, Fragment } from '@wordpress/element';
 import { IconButton, Spinner } from '@wordpress/components';
 import { isBlobURL } from '@wordpress/blob'; // @TODO Add dep Jetpack-side
-import { RichText } from '@wordpress/editor';
+/* @TODO Caption has been commented out */
+// import { RichText } from '@wordpress/editor';
 import { withSelect } from '@wordpress/data';
 
 /**
@@ -17,21 +18,22 @@ import { __ } from 'gutenberg/extensions/presets/jetpack/utils/i18n';
 class GalleryImageEdit extends Component {
 	img = createRef();
 
-	state = {
-		captionSelected: false,
-	};
+	/* @TODO Caption has been commented out */
+	// state = {
+	// 	captionSelected: false,
+	// };
 
-	onSelectCaption = () => {
-		if ( ! this.state.captionSelected ) {
-			this.setState( {
-				captionSelected: true,
-			} );
-		}
+	// onSelectCaption = () => {
+	// 	if ( ! this.state.captionSelected ) {
+	// 		this.setState( {
+	// 			captionSelected: true,
+	// 		} );
+	// 	}
 
-		if ( ! this.props.isSelected ) {
-			this.props.onSelect();
-		}
-	};
+	// 	if ( ! this.props.isSelected ) {
+	// 		this.props.onSelect();
+	// 	}
+	// };
 
 	onImageClick = e => {
 		// Don't let click event trigger naviagtion on <a>. @TODO How does g7g handle this?
@@ -60,14 +62,15 @@ class GalleryImageEdit extends Component {
 		}
 	};
 
-	static getDerivedStateFromProps( props, state ) {
-		// unselect the caption so when the user selects other image and comeback
-		// the caption is not immediately selected
-		if ( ! props.isSelected && state.captionSelected ) {
-			return { captionSelected: false };
-		}
-		return null;
-	}
+	/* @TODO Caption has been commented out */
+	// static getDerivedStateFromProps( props, state ) {
+	// 	// unselect the caption so when the user selects other image and comeback
+	// 	// the caption is not immediately selected
+	// 	if ( ! props.isSelected && state.captionSelected ) {
+	// 		return { captionSelected: false };
+	// 	}
+	// 	return null;
+	// }
 
 	componentDidUpdate() {
 		const { alt, height, image, url, width } = this.props;
@@ -98,7 +101,7 @@ class GalleryImageEdit extends Component {
 		const {
 			'aria-label': ariaLabel,
 			alt,
-			caption,
+			// caption,
 			height,
 			id,
 			isSelected,
@@ -106,7 +109,7 @@ class GalleryImageEdit extends Component {
 			linkTo,
 			onRemove,
 			origUrl,
-			setAttributes,
+			// setAttributes,
 			url,
 			width,
 		} = this.props;
@@ -164,7 +167,7 @@ class GalleryImageEdit extends Component {
 					</div>
 				) }
 				{ href ? <a href={ href }>{ img }</a> : img }
-				{ ! RichText.isEmpty( caption ) || isSelected ? (
+				{ /* ( ! RichText.isEmpty( caption ) || isSelected ) && (
 					<RichText
 						tagName="figcaption"
 						placeholder={ __( 'Write caption…' ) }
@@ -174,7 +177,7 @@ class GalleryImageEdit extends Component {
 						unstableOnFocus={ this.onSelectCaption }
 						inlineToolbar
 					/>
-				) : null }
+				) */ }
 			</figure>
 		);
 	}
